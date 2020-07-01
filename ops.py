@@ -78,11 +78,11 @@ def image_dist_transform(X, mu, std, pi, Mu_tmpl, Std_tmpl, IMAGE_SIZE, ClusterN
 
 def weight_variable(shape, stddev=0.02, name=None):
     # print(shape)
-    initial = tf.truncated_normal(shape, stddev=stddev)
+    initial = tf.random.truncated_normal(shape, stddev=stddev)
     if name is None:
         return tf.Variable(initial)
     else:
-        return tf.get_variable(name, initializer=initial)
+        return tf.compat.v1.get_variable(name, initializer=initial)
 
 
 def bias_variable(shape, name=None):
@@ -90,14 +90,14 @@ def bias_variable(shape, name=None):
     if name is None:
         return tf.Variable(initial)
     else:
-        return tf.get_variable(name, initializer=initial)
+        return tf.compat.v1.get_variable(name, initializer=initial)
         
 def conv2d_basic(x, W, bias):
-    conv = tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding="SAME")
+    conv = tf.nn.conv2d(input=x, filters=W, strides=[1, 1, 1, 1], padding="SAME")
     return tf.nn.bias_add(conv, bias)
 
 def max_pool_2x2(x):
-    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
+    return tf.nn.max_pool2d(input=x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
 
 #def RGB2HSD(X):
 #    eps = tf.contrib.keras.backend.epsilon()

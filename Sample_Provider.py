@@ -3,6 +3,7 @@ import scipy.misc as misc
 from scipy.ndimage import rotate
 from ops import find_files
 import os
+import imageio
 
 
 class SampleProvider(object):
@@ -13,7 +14,7 @@ class SampleProvider(object):
     self.path = data_dir
     self.fileformat = fileformat
     self.reset_batch_offset()
-    self.files = self._create_image_lists()
+    self.files = self._create_image_lists() 
     self.image_options = image_options
     self._read_images()
     
@@ -32,18 +33,18 @@ class SampleProvider(object):
 
   def _read_images(self):
     self.__channels = True
-    self.images_org = np.array([misc.imread(filename) for filename in self.files])
+    self.images_org = np.array([imageio.imread(filename) for filename in self.files])
    
   def _transform(self, images_org):
         
     if self.image_options["crop"]:
         resize_size = int(self.image_options["resize_size"])
-        y  = np.random.permutation(range(resize_size/2, images_org.shape[0]-resize_size/2))
+        y  = np.random.permutation(range(resize_size//2, images_org.shape[0]-resize_size//2))
         y = int(y[0])
         y1 = int(y - resize_size/2.0)
         y2 = int(y + resize_size/2.0)
         
-        x  = np.random.permutation(range(resize_size/2, images_org.shape[1]-resize_size/2))
+        x  = np.random.permutation(range(resize_size//2, images_org.shape[1]-resize_size//2))
         x = int(x[0])
         x1 = int(x - resize_size/2.0)
         x2 = int(x + resize_size/2.0)

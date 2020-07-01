@@ -6,6 +6,7 @@ import tensorflow as tf
 import ops as utils
 from GMM_M_Step import GMM_M_Step
 
+tf.compat.v1.disable_eager_execution()
 
 class CNN(object):
   def __init__(self, name, config, is_train):
@@ -13,7 +14,7 @@ class CNN(object):
     self.is_train = is_train
     self.reuse = None
     
-    with tf.variable_scope(self.name, reuse=self.reuse):
+    with tf.compat.v1.variable_scope(self.name, reuse=self.reuse):
         G_W1 = utils.weight_variable([3, 3, 1, 32], name="G_W1")
         G_b1 = utils.bias_variable([32], name="G_b1")
         
@@ -52,13 +53,13 @@ class CNN(object):
                  'G_W9':G_W9, 'G_b9':G_b9 }
       
     if self.reuse is None:
-          self.var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=self.name)
-          self.saver = tf.train.Saver(self.var_list)
+          self.var_list = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.GLOBAL_VARIABLES, scope=self.name)
+          self.saver = tf.compat.v1.train.Saver(self.var_list)
           self.reuse = True         
 
    
   def __call__(self, D):
-    with tf.variable_scope(self.name, reuse=self.reuse):
+    with tf.compat.v1.variable_scope(self.name, reuse=self.reuse):
         
         D_norm = D 
         
@@ -86,7 +87,7 @@ class CNN(object):
         output_shape[2] *= 2
         output_shape[3] = self.Param['G_W6'].get_shape().as_list()[2]
            
-        G_rs6 = tf.image.resize_images(G_relu5, output_shape[1:3], method=tf.image.ResizeMethod.NEAREST_NEIGHBOR) 
+        G_rs6 = tf.image.resize(G_relu5, output_shape[1:3], method=tf.image.ResizeMethod.NEAREST_NEIGHBOR) 
         G_conv6 = utils.conv2d_basic(G_rs6, self.Param['G_W6'], self.Param['G_b6'])
         G_relu6 = tf.nn.relu(G_conv6, name="G_rs6")
         
@@ -95,7 +96,7 @@ class CNN(object):
         output_shape[2] *= 2
         output_shape[3] = self.Param['G_W7'].get_shape().as_list()[2]
     
-        G_rs7 = tf.image.resize_images(G_relu6, output_shape[1:3], method=tf.image.ResizeMethod.NEAREST_NEIGHBOR) 
+        G_rs7 = tf.image.resize(G_relu6, output_shape[1:3], method=tf.image.ResizeMethod.NEAREST_NEIGHBOR) 
         G_conv7 = utils.conv2d_basic(G_rs7, self.Param['G_W7'], self.Param['G_b7'])
         G_relu7 = tf.nn.relu(G_conv7, name="G_rs7")
         
@@ -116,7 +117,7 @@ class DCGMM(object):
     self.is_train = is_train
 
 
-    self.X_hsd = tf.placeholder(tf.float32, shape=[config.batch_size, config.im_size, config.im_size, 3], name="original_color_image")
+    self.X_hsd = tf.compat.v1.placeholder(tf.float32, shape=[config.batch_size, config.im_size, config.im_size, 3], name="original_color_image")
     self.D, h_s = tf.split(self.X_hsd,[1,2], axis=3)
 
     self.E_Step = CNN("E_Step", config, is_train=self.is_train)
@@ -125,10 +126,10 @@ class DCGMM(object):
     
     if self.is_train:
 
-      self.optim = tf.train.AdamOptimizer(config.lr)
+      self.optim = tf.compat.v1.train.AdamOptimizer(config.lr)
       self.train = self.optim.minimize(self.loss, var_list=self.E_Step.Param)
 
-    ClsLbl = tf.arg_max(self.Gama, 3)
+    ClsLbl = tf.argmax(self.Gama, 3)
     ClsLbl = tf.cast(ClsLbl, tf.float32)
     
     ColorTable = [[255,0,0],[0,255,0],[0,0,255],[255,255,0], [0,255,255], [255,0,255]]
@@ -136,21 +137,21 @@ class DCGMM(object):
     Msk = tf.tile(tf.expand_dims(ClsLbl, axis=3),[1,1,1,3])
     for k in range(0, config.ClusterNo):
         ClrTmpl = tf.einsum('anmd,df->anmf', tf.expand_dims(tf.ones_like(ClsLbl), axis=3), tf.reshape(colors[k,...],[1,3]))
-        Msk = tf.where(tf.equal(Msk,k), ClrTmpl, Msk)
+        Msk = tf.compat.v1.where(tf.equal(Msk,k), ClrTmpl, Msk)
     
     
     self.X_rgb = utils.HSD2RGB(self.X_hsd)
-    tf.summary.image("1.Input_image", self.X_rgb*255.0, max_outputs=2)
-    tf.summary.image("2.Gamma_image",  Msk, max_outputs=2)
-    tf.summary.image("3.Density_image", self.D*255.0, max_outputs=2)
-    tf.summary.scalar("loss", self.loss)
+    tf.compat.v1.summary.image("1.Input_image", self.X_rgb*255.0, max_outputs=2)
+    tf.compat.v1.summary.image("2.Gamma_image",  Msk, max_outputs=2)
+    tf.compat.v1.summary.image("3.Density_image", self.D*255.0, max_outputs=2)
+    tf.compat.v1.summary.scalar("loss", self.loss)
 
-    self.summary_op = tf.summary.merge_all()
+    self.summary_op = tf.compat.v1.summary.merge_all()
 
-    self.saver = tf.train.Saver()
-    self.summary_writer = tf.summary.FileWriter(config.logs_dir, self.sess.graph)
+    self.saver = tf.compat.v1.train.Saver()
+    self.summary_writer = tf.compat.v1.summary.FileWriter(config.logs_dir, self.sess.graph)
 
-    self.sess.run(tf.global_variables_initializer())
+    self.sess.run(tf.compat.v1.global_variables_initializer())
     
     ckpt = tf.train.get_checkpoint_state(config.logs_dir)
     if ckpt and ckpt.model_checkpoint_path:

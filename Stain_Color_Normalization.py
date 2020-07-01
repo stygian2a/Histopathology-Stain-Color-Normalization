@@ -7,6 +7,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import scipy.misc as misc
+import imageio
 
 from model import DCGMM
 from config import get_config
@@ -14,16 +15,16 @@ from Sample_Provider import SampleProvider
 from ops import image_dist_transform
 import ops as utils
 
-FLAGS = tf.flags.FLAGS
-tf.flags.DEFINE_string('mode', "prediction", "Mode train/ prediction")
-tf.flags.DEFINE_string("logs_dir", "./logs_DGMM_HSD/", "path to logs directory")
-tf.flags.DEFINE_string("data_dir", "/media/farhad/DataVolume1/Data/Pathology_Color_Normalization/StainStudy_Dataset/", "path to dataset")
-tf.flags.DEFINE_string("tmpl_dir", None, "path to template image(s)")
-tf.flags.DEFINE_string("out_dir", None, "path to template image(s)")
+FLAGS = tf.compat.v1.flags.FLAGS
+tf.compat.v1.flags.DEFINE_string('mode', "prediction", "Mode train/ prediction")
+tf.compat.v1.flags.DEFINE_string("logs_dir", "./logs_DGMM_HSD/", "path to logs directory")
+tf.compat.v1.flags.DEFINE_string("data_dir", "/media/farhad/DataVolume1/Data/Pathology_Color_Normalization/StainStudy_Dataset/", "path to dataset")
+tf.compat.v1.flags.DEFINE_string("tmpl_dir", None, "path to template image(s)")
+tf.compat.v1.flags.DEFINE_string("out_dir", None, "path to template image(s)")
 
 
 def main():
-  sess = tf.Session()
+  sess = tf.compat.v1.Session()
   
   if FLAGS.mode == "train": 
       is_train = True
@@ -106,7 +107,7 @@ def main():
 
           if not os.path.exists(config.out_dir):
              os.makedirs(config.out_dir)
-          misc.imsave(config.out_dir+filename, np.squeeze(X_conv))        
+          imageio.imwrite(config.out_dir+filename.replace('.tif', '.png'), np.squeeze(X_conv))        
       
   else:
       print('Invalid "mode" string!')
