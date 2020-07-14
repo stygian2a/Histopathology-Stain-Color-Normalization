@@ -6,7 +6,6 @@
 import tensorflow as tf
 import numpy as np
 import os
-import scipy.misc as misc
 import imageio
 
 from model import DCGMM
@@ -105,9 +104,10 @@ def main():
           filename = filename[0].split('/')[-1]
           print(filename)
 
-          if not os.path.exists(config.out_dir):
-             os.makedirs(config.out_dir)
-          imageio.imwrite(config.out_dir+filename.replace('.tif', '.png'), np.squeeze(X_conv))        
+          dirname = '\\'.join((config.out_dir+filename).split('\\')[:-1])
+          if not os.path.exists(dirname):
+             os.makedirs(dirname)
+          imageio.imwrite(config.out_dir+filename, np.squeeze(X_conv))        
       
   else:
       print('Invalid "mode" string!')

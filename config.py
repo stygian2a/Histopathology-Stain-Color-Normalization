@@ -15,23 +15,23 @@ def get_config(FLAGS, is_train):
   config.batch_size = 1  # The current implementation only supports a batch size equal to unity!
 
   if is_train:
-    config.im_size = 500 # The width and height should be equal. Upper bound of the input image size is limited to the GPU memory.
+    config.im_size = 1024 # The width and height should be equal. Upper bound of the input image size is limited to the GPU memory.
     config.lr = 1e-4
     config.iteration = 10e6
     
     config.ReportInterval  = 50
     config.SavingInterval  = 500
 
-    config.image_options = {'resize': False, 'resize_size': config.im_size, 'crop': True, 'flip': True, 'rotate_stepwise': True}
-    config.fileformat = 'tif'
+    config.image_options = {'resize': False, 'resize_size': config.im_size, 'crop': False, 'flip': True, 'rotate_stepwise': True}
+    config.fileformat = 'png'
     
   else:
     config.batch_size = 1
-    config.im_size = 500 # The width and height should be equal. Upper bound of the input image size is limited to the GPU memory.
+    config.im_size = 1024 # The width and height should be equal. Upper bound of the input image size is limited to the GPU memory.
 
     config.ReportInterval  = None
     config.SavingInterval  = None
-    config.image_options = {'resize': False, 'resize_size': config.im_size, 'crop': True, 'flip': False, 'rotate_stepwise': False}
-    config.fileformat = 'tif'
+    config.image_options = {'resize': False, 'resize_size': config.im_size, 'crop': False, 'flip': False, 'rotate_stepwise': False}
+    config.fileformat = 'png'
 
   return config

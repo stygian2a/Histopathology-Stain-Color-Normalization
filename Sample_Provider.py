@@ -4,6 +4,7 @@ from scipy.ndimage import rotate
 from ops import find_files
 import os
 import imageio
+import random
 
 
 class SampleProvider(object):
@@ -33,23 +34,33 @@ class SampleProvider(object):
 
   def _read_images(self):
     self.__channels = True
-    self.images_org = np.array([imageio.imread(filename) for filename in self.files])
+    
+    if self.is_train:
+        # read 1000 random images
+        filenames_sample = random.sample(self.files, 1000)
+    else:
+        filenames_sample = self.files[:1000]
+       # self.files = self.files[1000:]
+    
+    self.images_org = np.array([imageio.imread(filename) for filename in filenames_sample])
    
-  def _transform(self, images_org):
+  def _transform(self, image):
+      
         
     if self.image_options["crop"]:
         resize_size = int(self.image_options["resize_size"])
-        y  = np.random.permutation(range(resize_size//2, images_org.shape[0]-resize_size//2))
+        y  = np.random.permutation(range(resize_size//2, image.shape[0]-resize_size//2))
         y = int(y[0])
         y1 = int(y - resize_size/2.0)
         y2 = int(y + resize_size/2.0)
         
-        x  = np.random.permutation(range(resize_size//2, images_org.shape[1]-resize_size//2))
+        x  = np.random.permutation(range(resize_size//2, image.shape[1]-resize_size//2))
         x = int(x[0])
         x1 = int(x - resize_size/2.0)
         x2 = int(x + resize_size/2.0)
         
-        image = images_org[y1:y2, x1:x2,...]
+        image = image[y1:y2, x1:x2,...]
+    
         
     if self.image_options["resize"]:
         resize_size = int(self.image_options["resize_size"])
@@ -85,18 +96,20 @@ class SampleProvider(object):
     if self.batch_offset > self.images_org.shape[0]:
         
         if not self.is_train:
-            image = []
-            return image
+            self.files = self.files[1000:]
+            if len(self.files) == 0:
+                image = []
+                return image      
             
         # Finished epoch
         self.epochs_completed += 1
         print(">> Epochs completed: #" + str(self.epochs_completed))
         # Shuffle the data
-        perm = np.arange(self.images_org.shape[0], dtype=np.int)
-        np.random.shuffle(perm)
-        
-        self.images_org = self.images_org[perm]
-        self.files = [self.files[k] for k in perm] 
+            #perm = np.arange(self.images_org.shape[0], dtype=np.int)
+            #np.random.shuffle(perm)
+            #self.images_org = self.images_org[perm]
+            #self.files = [self.files[k] for k in perm] 
+        self._read_images()
         
         # Start next epoch
         start = 0
