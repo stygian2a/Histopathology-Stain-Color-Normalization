@@ -33,23 +33,26 @@ class SampleProvider(object):
 
   def _read_images(self):
     self.__channels = True
-    self.images_org = np.array([imageio.imread(filename) for filename in self.files])
-   
+
+    self.images_org = np.array([imageio.imread(filename)[:,:,:3] for filename in self.files])
+    print(self.images_org.shape)
+
   def _transform(self, images_org):
-        
+    image = images_org
     if self.image_options["crop"]:
         resize_size = int(self.image_options["resize_size"])
-        y  = np.random.permutation(range(resize_size//2, images_org.shape[0]-resize_size//2))
-        y = int(y[0])
-        y1 = int(y - resize_size/2.0)
-        y2 = int(y + resize_size/2.0)
-        
-        x  = np.random.permutation(range(resize_size//2, images_org.shape[1]-resize_size//2))
-        x = int(x[0])
-        x1 = int(x - resize_size/2.0)
-        x2 = int(x + resize_size/2.0)
-        
-        image = images_org[y1:y2, x1:x2,...]
+        if len(range(resize_size//2, images_org.shape[0]-resize_size//2)) > 0:
+          y  = np.random.permutation(range(resize_size//2, images_org.shape[0]-resize_size//2))
+          y = int(y[0])
+          y1 = int(y - resize_size/2.0)
+          y2 = int(y + resize_size/2.0)
+          
+          x  = np.random.permutation(range(resize_size//2, images_org.shape[1]-resize_size//2))
+          x = int(x[0])
+          x1 = int(x - resize_size/2.0)
+          x2 = int(x + resize_size/2.0)
+          
+          image = images_org[y1:y2, x1:x2,...]
         
     if self.image_options["resize"]:
         resize_size = int(self.image_options["resize_size"])
