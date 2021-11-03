@@ -20,7 +20,7 @@ tf.compat.v1.flags.DEFINE_string('mode', "prediction", "Mode train/ prediction")
 tf.compat.v1.flags.DEFINE_string("logs_dir", "./logs_DGMM_HSD/", "path to logs directory")
 tf.compat.v1.flags.DEFINE_string("data_dir", "/media/farhad/DataVolume1/Data/Pathology_Color_Normalization/StainStudy_Dataset/", "path to dataset")
 tf.compat.v1.flags.DEFINE_string("tmpl_dir", None, "path to template image(s)")
-tf.compat.v1.flags.DEFINE_string("out_dir", None, "path to template image(s)")
+tf.compat.v1.flags.DEFINE_string("out_dir", None, "Path to folder for ouput images")
 
 
 def main():
